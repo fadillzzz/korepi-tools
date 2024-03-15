@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const options = {
     key: fs.readFileSync('certs/md5c.korepi.com.key'),
     cert: fs.readFileSync('certs/md5c.korepi.com.crt'),
-    ca: [fs.readFileSync('certs/DONOTTRUSTKOREPI.crt')],
+    ca: [fs.readFileSync('certs/md5c.korepi.com.crt')],
 };
 
 const license = require('./enc.json');
