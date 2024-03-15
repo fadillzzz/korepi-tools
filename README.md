@@ -2,6 +2,10 @@
 
 Some Korepi related stuff that I wrote while learning how to hack
 
+## Prerequisites
+
+You'll want to have at least Node 18 or newer. Don't forget to install the dependencies with `npm i`.
+
 ## How to Use
 
 1. Launch Korepi once without any license, and it should give you a hardware ID.
