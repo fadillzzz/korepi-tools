@@ -38,11 +38,14 @@ async function generateSelfSignedCerts() {
         {
             name: 'subjectAltName',
             altNames: [{
-                type: 2, // URI
+                type: 2,
                 value: 'md5c.korepi.com'
             }, {
-                type: 2, // IP
+                type: 2,
                 value: 'md5c.mxmicah.me'
+            }, {
+                type: 2,
+                value: 'auth.btxo.cn'
             }]
         }
     ]);
