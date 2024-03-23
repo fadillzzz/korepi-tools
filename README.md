@@ -17,7 +17,7 @@ You'll want to have at least Node 18 or newer. Don't forget to install the depen
 127.0.0.1 md5c.korepi.com
 127.0.0.1 md5c.mxmicah.me
 ```
-6. Then start `server.js` and launch Korepi.
+6. Then start `local_auth.js` and launch Korepi.
 
 ## How to Use (Online auth)
 
@@ -31,9 +31,9 @@ You'll want to have at least Node 18 or newer. Don't forget to install the depen
 ```
 127.0.0.1 auth.btxo.cn
 ```
-4. Then start `server.js` and launch Korepi.
+4. Then start `online_auth.js` and launch Korepi.
 
-**NOTE:** For future launches, you only need to run the `server.js` file (no need to regenerate the license or SSL).
+**NOTE:** For future launches, you only need to run the auth server (i.e. `local_auth.js` or `online_auth.js`) (no need to regenerate the license or SSL).
 
 ## Credits
 
