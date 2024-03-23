@@ -8,8 +8,6 @@ const options = {
     ca: [fs.readFileSync('certs/md5c.korepi.com.crt')],
 };
 
-const license = require('./enc.json');
-
 function getHash(payload) {
     const hash = crypto.createHash('sha256');
 
@@ -119,6 +117,7 @@ const requestListener = function (req, res) {
     console.log(new Date().toISOString() + ': ' + req.headers.host + req.url);
 
     if (req.url.indexOf('/prod-api/online/subscribe/md5verify') !== -1) {
+        const license = require('./enc.json');
         const path = req.url;
         const splits = path.split('/');
         const id = splits[splits.length - 1];
