@@ -38,3 +38,4 @@ You'll want to have at least Node 18 or newer. Don't forget to install the depen
 ## Credits
 
 - Anonymous for providing a key for testing
+- [notmarerk](https://github.com/notmarek) for his help in finding the salt for the payload signature

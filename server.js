@@ -39,7 +39,7 @@ function getHash(payload) {
         }
     }
 
-    restructured = restructured.join('');
+    restructured = restructured.join('') + '.abcd@efgc][s123%$@fgc][s12.abcd@';
 
     return hash.update(restructured).digest('hex');
 }
@@ -130,7 +130,7 @@ const requestListener = function (req, res) {
             updateTime: new Date().toISOString(),
             delFlag: 0,
             remark: "Oops!",
-            id: matches[2],
+            id: Number(matches[2]),
             roleValue: 25, // PERTAMAX?
             cardKey: null,
             expiryTime: new Date(Math.floor((Math.pow(2, 32) - 1) / 2) * 1000).toISOString(),
