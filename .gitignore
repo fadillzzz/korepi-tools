@@ -1,3 +1,6 @@
 certs/
 enc.json
 ext_enc.json
+debug_online.js
+node_modules/
+certs_backup/
