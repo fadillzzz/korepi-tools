@@ -7,10 +7,6 @@ async function generateSelfSignedCerts() {
         fs.mkdirSync('certs');
     }
 
-    // openssl req -x509 -days 3650 -key ca_private_key.pem -out ca_cert.pem
-    // openssl req -new -key my_private_key.pem -out my_cert_req.pem
-    // openssl x509 -req -in my_cert_req.pem -days 3650 -CA ca_cert.pem -CAkey ca_private_key.pem -CAcreateserial -out my_signed_cert.pem -extfile config
-
     const keyPair = await forge.pki.rsa.generateKeyPair(4096);
     const cert = forge.pki.createCertificate();
     cert.publicKey = keyPair.publicKey;

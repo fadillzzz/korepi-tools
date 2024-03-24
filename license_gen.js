@@ -52,7 +52,7 @@ VqquzXQuHpi/UwwiVoBX0Qi1/bWI1t5krlF4Me17cT6hffD0N/Qr
     let privatekeyPkcs1PemEnc = cipher.update(privateKey, 'utf8', 'base64');
     privatekeyPkcs1PemEnc += cipher.final('base64');
 
-    const license = { "cardstr": "free-korepi", "expiry_time": Math.floor((Math.pow(2, 32) - 1) / 2), "hwid": hwid, "role": 25, "data_id": 1, "user_id": 1 };
+    const license = { "cardstr": "free-korepi", "expiry_time": Math.floor((Math.pow(2, 32) - 1) / 2), "hwid": hwid, "role": 25, "data_id": Math.floor(Math.random() * 100000), "user_id": Math.floor(Math.random() * 100000) };
     const encryptedLicense = crypto.publicEncrypt({ key: publicKey, padding: crypto.constants.RSA_PKCS1_PADDING }, JSON.stringify(license)).toString('base64');
     const packedLicense = JSON.stringify({ "encrypted.dat": encryptedLicense, "Encrypted.md5": encryptedMd5, "privatekey_pkcs1.pem.enc": privatekeyPkcs1PemEnc });
 
