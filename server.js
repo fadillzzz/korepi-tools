@@ -1,7 +1,7 @@
 const https = require('https');
 const fs = require('fs');
 const crypto = require('crypto');
-const { print_header, print_success, print_info, print_warn } = require('./utils/printer.js');
+const { printHeader, printSuccess, printInfo, printError } = require('./utils/printer.js');
 
 const options = {
     key: fs.readFileSync('certs/md5c.korepi.com.key'),
@@ -47,8 +47,6 @@ function getHash(payload) {
 
 let encKey = '';
 let hwid = '';
-
-const license = require('./enc.json');
 
 function getHmac(requestType, payload) {
     let secret = 'aaa49c02ddae6a76e805e79e8d9bb788f3c80556b43b4a70fb3513bdc4e37454';
@@ -110,14 +108,14 @@ function getFakePayloadForOnlineAuth(type) {
         }
 
     } else {
-        print_error("Unknown Request type", type); //console.error
+        printError("Unknown Request type", type);
     }
 
     return payload;
 }
 
 const requestListener = function (req, res) {
-    print_info (req.headers.host + req.url); //console.log
+    printInfo(req.headers.host + req.url);
 
     if (req.url.indexOf('/prod-api/online/subscribe/md5verify') !== -1) {
         const license = require('./enc.json');
@@ -164,13 +162,13 @@ const requestListener = function (req, res) {
 
         req.on('end', () => {
             const matches = body.match(/type=(.+?)\&/);
-            print_info ("Request type is", matches[1]); //console.log
+            printInfo("Request type is", matches[1]);
             const requestType = matches[1];
 
             if (requestType === 'init') {
                 const matches = body.match(/enckey=(.+?)\&/);
                 encKey = matches[1];
-                print_info ("Setting enckey to", encKey); //console.log
+                printInfo("Setting enckey to", encKey);
             }
 
             if (requestType === 'checkblacklist') {
@@ -186,16 +184,16 @@ const requestListener = function (req, res) {
             res.end(fakeResponse);
         });
     } else {
-        res.end("Hellow World!");
+        res.end("Hello World!");
     }
 };
 
 console.clear();
-print_header();
+printHeader();
 
 const server = https.createServer(options, requestListener);
 
 server.listen(443, "0.0.0.0", () => {
-    print_success ("Server started. Listening on port 443");
-    print_success ("You may now launch Korepi Launcher.");
+    printSuccess("Server started. Listening on port 443");
+    printSuccess("You may now launch Korepi Launcher.");
 });

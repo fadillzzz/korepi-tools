@@ -5,7 +5,7 @@ const success = chalk.bold.green;
 const error = chalk.bold.red;
 const warn = chalk.hex('#FFA500');
 
-function print_header() {
+function printHeader() {
     const title = `    __ __                      _     ______            __    
    / //_____  ________  ____  (_)   /_  ______  ____  / _____
   / ,< / __ \\/ ___/ _ \\/ __ \\/ ______/ / / __ \\/ __ \\/ / ___/
@@ -14,22 +14,22 @@ function print_header() {
                     /_/                                        
 `;
     console.log(title);
-    print_success('Created by @Fad#1234');
+    printSuccess('Created by @Fad#1234');
 }
 
-function print_info(str) {
+function printInfo(str) {
     console.log(info(getCurrentTime() + ' -> ' + String(str)));
 }
 
-function print_success(str) {
+function printSuccess(str) {
     console.log(success(getCurrentTime() + ' -> ' + String(str)));
 }
 
-function print_warn(str) {
+function printWarn(str) {
     console.log(warn(getCurrentTime() + ' -> ' + String(str)));
 }
 
-function print_error(str) {
+function printError(str) {
     console.log(error(getCurrentTime() + ' -> ' + String(str)));
 }
 
@@ -39,4 +39,4 @@ function getCurrentTime() {
     return time;
 }
 
-module.exports = { print_header, print_info, print_success, print_warn, print_error };
+module.exports = { printHeader, printInfo, printSuccess, printWarn, printError };

@@ -14,8 +14,8 @@ You'll want to have at least Node 18 or newer. Don't forget to install the depen
 4. Run `ssl_gen.js` and install the generated certificated (`certs/md5c.korepi.com.crt`) as a trusted root certificate.
 5. Edit your hosts file and add the following lines:
 ```
-127.0.0.1 md5c.kOrepi.com
-127.0.0.1 md5c.mxmIcah.me
+127.0.0.1 md5c.Korepi.com
+127.0.0.1 md5c.Mxmicah.me
 ```
 6. Then start `server.js` and launch Korepi.
 
