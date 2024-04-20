@@ -42,6 +42,9 @@ async function generateSelfSignedCerts() {
             }, {
                 type: 2,
                 value: 'auth.btxo.cn'
+            }, {
+                type: 2,
+                value: 'md5c.535888.xyz'
             }]
         }
     ]);

@@ -16,6 +16,7 @@ You'll want to have at least Node 18 or newer. Don't forget to install the depen
 ```
 127.0.0.1 md5c.Korepi.com
 127.0.0.1 md5c.Mxmicah.me
+127.0.0.1 md5C.535888.xyz
 ```
 6. Then start `server.js` and launch Korepi.
 
