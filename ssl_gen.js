@@ -41,6 +41,9 @@ async function generateSelfSignedCerts() {
                 value: 'md5c.mxmicah.me'
             }, {
                 type: 2,
+                value: 'md5c.mxmicah.com'
+            }, {
+                type: 2,
                 value: 'auth.btxo.cn'
             }, {
                 type: 2,

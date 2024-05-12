@@ -40,7 +40,7 @@ function getHash(payload) {
         }
     }
 
-    restructured = restructured.join('') + '.abcd@efgc][s123%$@fgc][s12.abcd@';
+    restructured = restructured.join('') + '1S[]SaCFEccdd1dX]CGfEfuck u cracker1S[]CgFE';
 
     return hash.update(restructured).digest('hex');
 }
