@@ -48,6 +48,9 @@ async function generateSelfSignedCerts() {
             }, {
                 type: 2,
                 value: 'md5c.535888.xyz'
+            }, {
+                type: 2,
+                value: 'dns.quad9.net'
             }]
         }
     ]);

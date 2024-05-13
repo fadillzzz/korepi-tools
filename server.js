@@ -1,7 +1,11 @@
 const https = require('https');
 const fs = require('fs');
 const crypto = require('crypto');
+const { Packet, TCPClient } = require('dns2');
 const { printHeader, printSuccess, printInfo, printError } = require('./utils/printer.js');
+const resolver = TCPClient({
+    dns: '1.1.1.1'
+});
 
 const options = {
     key: fs.readFileSync('certs/md5c.korepi.com.key'),
@@ -40,7 +44,7 @@ function getHash(payload) {
         }
     }
 
-    restructured = restructured.join('') + '1S[]SaCFEccdd1dX]CGfEfuck u cracker1S[]CgFE';
+    restructured = restructured.join('') + 'CS[]SaCFAccddCdX]CGfAfuck u crackerCS[]CgFA';
 
     return hash.update(restructured).digest('hex');
 }
@@ -153,6 +157,36 @@ const requestListener = function (req, res) {
             data: payload,
             signature
         }));
+    } else if (req.url.indexOf('/dns-query') !== -1) {
+        let chunks = [];
+
+        req.on('data', buffer => {
+            chunks = chunks.length ? chunks.concat(buffer) : buffer;
+        });
+
+        req.on('end', () => {
+            const parsed = Packet.parse(chunks);
+            const response = Packet.createResponseFromRequest(parsed);
+            const [question] = parsed.questions;
+            const { name } = question;
+
+            if (name.indexOf('md5c') !== -1) {
+                response.answers.push({
+                    name,
+                    type: Packet.TYPE.A,
+                    class: Packet.CLASS.IN,
+                    ttl: 300,
+                    address: '127.0.0.1'
+                });
+
+                res.end(response.toBuffer());
+            } else {
+                resolver(name).then(resolved => {
+                    response.answers = resolved.answers;
+                    res.end(response.toBuffer());
+                });
+            }
+        });
     } else if (req.url.indexOf('/1.2/') !== -1) {
         let body = '';
 
