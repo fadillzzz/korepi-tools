@@ -16,11 +16,7 @@ You'll want to have at least Node 18 or newer. Don't forget to install the depen
 ```
 49.13.228.83
 ```
-6. Edit your hosts file and add the following line:
-```
-127.0.0.1 dns.quad9.net
-```
-7. Then start `server.js` and launch Korepi.
+6. Then start `server.js` and launch Korepi.
 
 ## How to Use (Online auth)
 
