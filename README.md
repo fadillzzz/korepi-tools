@@ -12,11 +12,9 @@ You'll want to have at least Node 18 or newer. Don't forget to install the depen
 2. Then run the `license_gen.js` which will asks you for your HWID and generates a license file to use.
 3. **Copy** (don't cut) the license file into the same folder where the exe is located.
 4. Run `ssl_gen.js` and install the generated certificated (`certs/md5c.korepi.com.crt`) as a trusted root certificate.
-5. (Optional) if you've edited your hosts file in the past to add the following lines, make sure to re-edit the file and **remove them**:
+5. Edit your hosts file and add the following line:
 ```
-127.0.0.1 md5c.korepi.com
-127.0.0.1 md5c.mxmicah.me
-127.0.0.1 md5c.535888.xyz
+127.0.0.1 dns.quad9.net
 ```
 6. Then start `server.js` and launch Korepi.
 
