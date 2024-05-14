@@ -14,7 +14,7 @@ You'll want to have at least Node 18 or newer. Don't forget to install the depen
 4. Run `ssl_gen.js` and install the generated certificated (`certs/md5c.korepi.com.crt`) as a trusted root certificate.
 5. Set your DNS resolver to the following address:
 ```
-49.13.228.83
+127.0.0.1
 ```
 6. Then start `server.js` and launch Korepi.
 
@@ -32,7 +32,9 @@ You'll want to have at least Node 18 or newer. Don't forget to install the depen
 ```
 4. Then start `server.js` and launch Korepi.
 
-**NOTE:** For future launches, you only need to run the `server.js` file (no need to regenerate the license or SSL).
+## Notes
+- For future launches, you only need to run the `server.js` file (no need to regenerate the license or SSL).
+- If you're already running a DNS resolver on port 53, then I assume you know what you're doing. 
 
 ## Credits
 

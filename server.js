@@ -1,9 +1,9 @@
 const https = require('https');
 const fs = require('fs');
 const crypto = require('crypto');
-const { Packet, TCPClient } = require('dns2');
-const { printHeader, printSuccess, printInfo, printError } = require('./utils/printer.js');
-const resolver = TCPClient({
+const { Packet, UDPClient, createServer: createDnsServer } = require('dns2');
+const { printHeader, printSuccess, printInfo, printError, printWarn } = require('./utils/printer.js');
+const resolver = UDPClient({
     dns: '1.1.1.1'
 });
 
@@ -118,6 +118,34 @@ function getFakePayloadForOnlineAuth(type) {
     return payload;
 }
 
+function dnsRequestHandler(request, send, rinfo) {
+    const response = Packet.createResponseFromRequest(request);
+    const [question] = request.questions;
+    let { name } = question;
+
+    if (name.includes('md5c') || name.match(/dns[\d]*\.quad9\.net/)) {
+        // Can't be bothered to figure this one out right now
+        if (name.includes('.localdomain')) {
+            name = name.replace('.localdomain', '');
+        }
+
+        response.answers.push({
+            name,
+            type: Packet.TYPE.A,
+            class: Packet.CLASS.IN,
+            ttl: 300,
+            address: '127.0.0.1'
+        });
+
+        send(response.toBuffer());
+    } else {
+        resolver(name).then(resolved => {
+            response.answers = resolved.answers;
+            send(response.toBuffer());
+        });
+    }
+}
+
 const requestListener = function (req, res) {
     printInfo(req.headers.host + req.url);
 
@@ -165,27 +193,7 @@ const requestListener = function (req, res) {
         });
 
         req.on('end', () => {
-            const parsed = Packet.parse(chunks);
-            const response = Packet.createResponseFromRequest(parsed);
-            const [question] = parsed.questions;
-            const { name } = question;
-
-            if (name.indexOf('md5c') !== -1) {
-                response.answers.push({
-                    name,
-                    type: Packet.TYPE.A,
-                    class: Packet.CLASS.IN,
-                    ttl: 300,
-                    address: '127.0.0.1'
-                });
-
-                res.end(response.toBuffer());
-            } else {
-                resolver(name).then(resolved => {
-                    response.answers = resolved.answers;
-                    res.end(response.toBuffer());
-                });
-            }
+            dnsRequestHandler(Packet.parse(chunks), res.end.bind(res), null);
         });
     } else if (req.url.indexOf('/1.2/') !== -1) {
         let body = '';
@@ -230,4 +238,30 @@ const server = https.createServer(options, requestListener);
 server.listen(443, "0.0.0.0", () => {
     printSuccess("Server started. Listening on port 443");
     printSuccess("You may now launch Korepi Launcher.");
+});
+
+const dnsServer = createDnsServer({
+    udp: true,
+    handle: dnsRequestHandler
+});
+
+dnsServer.on('error', (err) => {
+    printError('DNS Server error');
+    printError(err);
+    if (err.code === 'EADDRINUSE') {
+        printWarn('Port 53 is already in use. Assuming that you have your own DNS resolver configured to handle domain name lookups :)');
+    }
+});
+
+dnsServer.on('listening', () => {
+    printSuccess('DNS Server started. Listening on port 53. Please set your DNS to 127.0.0.1');
+    printWarn('You must keep this script running if you\'re using it as your DNS resolver.');
+});
+
+dnsServer.listen({
+    udp: {
+        port: 53,
+        address: '127.0.0.1',
+        type: 'udp4'
+    }
 });
