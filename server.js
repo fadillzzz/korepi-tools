@@ -140,7 +140,7 @@ function dnsRequestHandler(request, send, rinfo) {
         send(response.toBuffer());
     } else {
         resolver(name).then(resolved => {
-            response.answers = resolved.answers;
+            response.answers = resolved.answers.filter(answer => answer.address !== '104.21.45.239');
             send(response.toBuffer());
         });
     }
