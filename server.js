@@ -134,7 +134,7 @@ function dnsRequestHandler(request, send, rinfo) {
             type: Packet.TYPE.A,
             class: Packet.CLASS.IN,
             ttl: 300,
-            address: '127.0.0.1'
+            address: '104.21.45.239'
         });
 
         send(response.toBuffer());
@@ -226,7 +226,7 @@ const requestListener = function (req, res) {
             res.end(fakeResponse);
         });
     } else {
-        res.end("Hello World!");
+        res.end("This may not be the page you're looking for.");
     }
 };
 
