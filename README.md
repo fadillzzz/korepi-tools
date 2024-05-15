@@ -16,7 +16,9 @@ You'll want to have at least Node 18 or newer. Don't forget to install the depen
 ```
 127.0.0.1
 ```
-6. Then start `server.js` and launch Korepi.
+6. Start `server.js`
+7. Add `104.21.45.239` as an additional IP address on your network card. A guide on how to do that can be found [here](https://www.itsyourip.com/networking/how-to-add-multiple-ip-address-in-windows-2000xp2003/).
+8. Launch Korepi.
 
 ## How to Use (Online auth)
 
@@ -34,7 +36,8 @@ You'll want to have at least Node 18 or newer. Don't forget to install the depen
 
 ## Notes
 - For future launches, you only need to run the `server.js` file (no need to regenerate the license or SSL).
-- If you're already running a DNS resolver on port 53, then I assume you know what you're doing. 
+- If you're already running a DNS resolver on port 53, then I assume you know what you're doing.
+- I'm not responsible for any damages you may incur from using this. This is publicly available for educational purposes only.
 
 ## Credits
 
