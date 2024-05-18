@@ -13,9 +13,10 @@ You'll want to have at least Node 18 or newer. Don't forget to install the depen
 3. **Copy** (don't cut) the license file into the same folder where the exe is located.
 4. Run `ssl_gen.js` and install the generated certificated (`certs/md5c.korepi.com.crt`) as a trusted root certificate.
 5. Start `server.js`.
-6. Set your DNS resolver to the following address:
+6. Edit your hosts file (`C:\Windows\system32\drivers\etc\hosts`) and add the following lines:
 ```
-127.0.0.1
+127.0.0.1 ghp.535888.xyz
+127.0.0.1 md5c.535888.xyz
 ```
 7. Use any DLL injector that you prefer and have it auto inject `lol.dll` (available from the [releases](https://github.com/fadillzzz/korepi-tools/releases) page or compile yourself) into Korepi's launcher.
 8. Launch Korepi.

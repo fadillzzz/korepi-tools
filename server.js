@@ -155,7 +155,7 @@ function dnsRequestHandler(request, send, rinfo) {
     const [question] = request.questions;
     let { name } = question;
 
-    if (name.includes('md5c') || name.match(/dns[\d]*\.quad9\.net/) || name.includes('535888.xyz')) {
+    if (name.includes('md5c') || name.includes('535888.xyz')) {
         // Can't be bothered to figure this one out right now
         if (name.includes('.localdomain')) {
             name = name.replace('.localdomain', '');
