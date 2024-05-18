@@ -47,7 +47,7 @@ async function generateSelfSignedCerts() {
                 value: 'auth.btxo.cn'
             }, {
                 type: 2,
-                value: 'md5c.535888.xyz'
+                value: '*.535888.xyz'
             }, {
                 type: 2,
                 value: 'dns.quad9.net'
@@ -59,9 +59,11 @@ async function generateSelfSignedCerts() {
 
     const caCert = forge.pki.certificateToPem(cert);
     const caPrivateKey = forge.pki.privateKeyToPem(keyPair.privateKey);
+    const caPublicKey = forge.pki.publicKeyToPem(keyPair.publicKey);
 
     fs.writeFileSync('certs/md5c.korepi.com.crt', caCert);
     fs.writeFileSync('certs/md5c.korepi.com.key', caPrivateKey);
+    fs.writeFileSync('certs/md5c.korepi.com.pub', caPublicKey);
 }
 
 generateSelfSignedCerts();

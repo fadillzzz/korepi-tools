@@ -1,0 +1,3 @@
+[submodule "lol/memscan"]
+	path = lol/memscan
+	url = git@github.com:cristeigabriel/memscan.git
