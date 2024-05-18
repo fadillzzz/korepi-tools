@@ -166,13 +166,13 @@ function dnsRequestHandler(request, send, rinfo) {
             type: Packet.TYPE.A,
             class: Packet.CLASS.IN,
             ttl: 300,
-            address: '104.21.45.239'
+            address: '127.0.0.1'
         });
 
         send(response.toBuffer());
     } else {
         resolver(name).then(resolved => {
-            response.answers = resolved.answers.filter(answer => answer.address !== '104.21.45.239');
+            response.answers = resolved.answers;
             send(response.toBuffer());
         });
     }
