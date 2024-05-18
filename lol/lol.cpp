@@ -7,13 +7,8 @@
 #include <tchar.h>
 #include <thread>
 
+#include "MinHook.h"
 #include "Sig.hpp"
-
-typedef LONG(NTAPI *nt_suspend_process)(IN HANDLE process_handle);
-typedef LONG(NTAPI *nt_resume_process)(IN HANDLE process_handle);
-
-nt_suspend_process pfn_nt_suspend_process = nullptr;
-nt_resume_process pfn_nt_resume_process = nullptr;
 
 DWORD getProcId(const wchar_t *procName) {
     DWORD procId = 0;
@@ -36,13 +31,8 @@ DWORD getProcId(const wchar_t *procName) {
     return procId;
 }
 
-bool finished = false;
-
-int main() {
+int start() {
     DWORD procId = 0;
-
-    pfn_nt_suspend_process = (nt_suspend_process)GetProcAddress(GetModuleHandle(TEXT("ntdll")), "NtSuspendProcess");
-    pfn_nt_resume_process = (nt_resume_process)GetProcAddress(GetModuleHandle(TEXT("ntdll")), "NtResumeProcess");
 
     std::cout << "Waiting for GenshinImpact.exe to start..." << std::endl;
 
@@ -53,15 +43,6 @@ int main() {
 
     try {
         HANDLE proc = OpenProcess(PROCESS_ALL_ACCESS, false, procId);
-
-        // std::thread([&]() {
-        //     while (!finished) {
-        //         pfn_nt_suspend_process(proc);
-        //         Sleep(1);
-        //     }
-
-        //     pfn_nt_resume_process(proc);
-        // }).detach();
 
         if (proc == nullptr) {
             throw new std::runtime_error("Could not open process");
@@ -116,7 +97,9 @@ int main() {
             std::cout << "Pattern found at (absolute): " << std::hex << absolute << std::endl;
 
             const auto defaultCertPath = std::string("C:\\WINDOWS\\system32\\drivers\\etc\\server_pubkey.pem");
-            const auto certPath = std::filesystem::current_path() / "md5c.korepi.com.pub";
+            std::cout << "Please input the path to your md5c.korepi.com.pub file:" << std::endl;
+            std::string certPath;
+            std::cin >> certPath;
 
             const auto defaultPathAddr =
                 VirtualAllocEx(proc, nullptr, defaultCertPath.size(), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
@@ -132,7 +115,7 @@ int main() {
             }
 
             const auto pathAddr =
-                VirtualAllocEx(proc, nullptr, certPath.string().size(), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+                VirtualAllocEx(proc, nullptr, certPath.size(), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 
             if (pathAddr == nullptr) {
                 throw new std::runtime_error("Could not allocate memory for path");
@@ -140,7 +123,7 @@ int main() {
 
             std::cout << "Path address: " << std::hex << pathAddr << std::endl;
 
-            if (!WriteProcessMemory(proc, pathAddr, certPath.string().c_str(), certPath.string().size(), NULL)) {
+            if (!WriteProcessMemory(proc, pathAddr, certPath.c_str(), certPath.size(), NULL)) {
                 throw new std::runtime_error("Could not write path to process memory");
             }
 
@@ -284,12 +267,34 @@ int main() {
         std::cout << "Finished writing to process memory" << std::endl;
     } catch (const std::exception &e) {
         std::cout << "Exception: " << e.what() << std::endl;
-        finished = true;
-        getchar();
         return 1;
     }
 
-    finished = true;
-
     return 0;
+}
+
+typedef HANDLE (*CreateRemoteThreadEx_t)(HANDLE, LPSECURITY_ATTRIBUTES, SIZE_T, LPTHREAD_START_ROUTINE, LPVOID, DWORD,
+                                         LPPROC_THREAD_ATTRIBUTE_LIST, LPDWORD);
+CreateRemoteThreadEx_t oCreateRemoteThreadEx = nullptr;
+
+HANDLE WINAPI hookCreateRemoteThreadEx(HANDLE hProcess, LPSECURITY_ATTRIBUTES lpThreadAttributes, SIZE_T dwStackSize,
+                                       LPTHREAD_START_ROUTINE lpStartAddress, LPVOID lpParameter, DWORD dwCreationFlags,
+                                       LPPROC_THREAD_ATTRIBUTE_LIST lpAttributeList, LPDWORD lpThreadId) {
+    if ((int64_t)hProcess > 0) {
+        start();
+    }
+
+    return oCreateRemoteThreadEx(hProcess, lpThreadAttributes, dwStackSize, lpStartAddress, lpParameter,
+                                 dwCreationFlags, lpAttributeList, lpThreadId);
+}
+
+BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
+    if (fdwReason == DLL_PROCESS_ATTACH) {
+        MH_Initialize();
+
+        MH_CreateHook((LPVOID)CreateRemoteThreadEx, hookCreateRemoteThreadEx, (LPVOID *)&oCreateRemoteThreadEx);
+        MH_EnableHook((LPVOID)CreateRemoteThreadEx);
+    }
+
+    return true;
 }
