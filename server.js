@@ -13,32 +13,64 @@ const options = {
     ca: [fs.readFileSync('certs/md5c.korepi.com.crt')],
 };
 
+const privateKey = `-----BEGIN RSA PRIVATE KEY-----
+MIIEowIBAAKCAQEA0SxoW83nU4qAbHXqjhalMiU62ae79Ayv/EAmVfJEeCymJIpv
+tTqoPr99MBMDMHPxqqW1TgapD0bdAoU0vBpxG5INKIQnVi1ZE0YPP1GKUXN4nchM
+31a9NqG4mdWXtpD/jTt40Tpxn/zaj/5kDCuPo+iKQqwzKnE27Fyi0USLK82PfwCN
+0KlA4hmHUgB0UD+eG3VSlfHuU4ZITKqwEZFywREoekljDot8noMOQiBo0NgqmkLL
+K2WQ2TaTSm3A/E6d7FI+HrdPdl/GmMdTF1tflr1yMFQ1eAdOJqnmM5YxCv4FsU2q
+pZFFXNEbnjJ+mx549LMUWBUeRjOwZ8zXUWxdoQIDAQABAoIBAD65522oWHd38D0W
+O0lyxwU7nuNIZpev+lJV1mktppS3JveMQCWDupJekCcLfIhaLJ105eLJIod/Q6WO
+1pqV/1c6PBHrV3SDUtPxzX66cBUu4HvIZi0PcNxiMN6I698Gqmvq6rcrpIlKpSxL
+KCtyILgRcuy9gPZ4TvUgbn785BM1Hby1LwNLPs9fhyl6QZZq4eTgyH5iGNIoDlhf
+DZkyj2WbqQ9tsVS/lFPV9B0eexfTLsEYT179vTyUEwJLgcteAu7c8asC+1XU3Mer
+HbXedC0vytNoGBCo1dg4QYeSgN6DKbhhLqrQY9ibR1LZv91j5fskUIiqQf3wgANs
+TilkB/ECgYEA7eLKFAXbyxs1BRV0mUcu0f1DlQJGJGZoyWMe9RMxMNwaM3PcmkAa
+dWE8nmLvLoMz8+5sw7BQ0ZVxgfDVVld0MnwnsJOMlLbPj3oBz0SLbZbNFrIX6jrt
+K2hcjVFn/YFssYAzGtUWB9TtOFdn38K5Pj0vfDOnSIj1ngNRC4WvaRUCgYEA4Rnq
+LE6sqMQCbChJEgkSkJedJem2jwGep7Dt/GgvJEIPjfZT+RaKpkFf6qDAPMmKi3eF
+1chc5SqPeJ2E7bM/3L1szytQKWTBqsVqHpyVOTe0IAAybVS4Mx3ICtjTzuKgRERY
+LJUVBEgWU0xnnRJqlAXIjuTkE47dDgehTafwrV0CgYBsm2tJQvd7Pluxi38lb9NX
+efq98EDX442ZzFBY8b82oHax4QbpwbSSvKcxZNfwc2RnzQYJPdlYJpOhELRF7D2X
+wwlX27WGPAR9a+WhnJjPmtbdsseqX+biN45x0qXYnptiWrZ6XKjnQHZhj75T8ZIj
+cUnZubd5LVZ+IuOAkDNqlQKBgH77SXiZIRlLCTrONvovmANtI79BajSd60wZqQbc
+FsvTYEbrEE/RgYFsG5mV+RvRbZBjamJA1vaH3ctiwJv+pCX3zavIeT4AkqetGcIO
+/rb6T2hF9CxswERFppVH36Qzf8lC7KKpruNtbvqqfUDEJM8/u/Wv9WF7FARYFYxj
+EogZAoGBAMNI6WOB/u4vm5QpJVW+p33xyJJTmVTmzCFXCRsOvC0gDwBZcKGe4BIR
+E7CyLasw3HG9IhZYOi/KoX+UQrcAOcRPAsJmlqiQxu2qskX81AiOkhPEBprVRhj3
+VqquzXQuHpi/UwwiVoBX0Qi1/bWI1t5krlF4Me17cT6hffD0N/Qr
+-----END RSA PRIVATE KEY-----`;
+
+function signPayload(payload) {
+    let restructured = [];
+
+    const keys = Object.keys(payload);
+    keys.sort();
+
+    for (const k of keys) {
+        if (payload[k] !== null) {
+            restructured.push(payload[k].toString());
+        }
+    }
+
+    restructured = restructured.join('');
+
+    const sign = crypto.createSign('SHA256');
+    sign.write(restructured);
+    sign.end();
+
+    return sign.sign(privateKey, 'base64');
+}
+
 function getHash(payload) {
     const hash = crypto.createHash('sha256');
 
     let restructured = [];
 
-    const order = [
-        'cardKey',
-        'createBy',
-        'createTime',
-        'delFlag',
-        'expiryTime',
-        'fileMd5',
-        'hwid',
-        'id',
-        'lastLoginTime',
-        'pauseTime',
-        'remark',
-        'resetNum',
-        'resetTime',
-        'roleValue',
-        'status',
-        'updateBy',
-        'updateTime'
-    ];
+    const keys = Object.keys(payload);
+    keys.sort();
 
-    for (const k of order) {
+    for (const k of keys) {
         if (payload[k] !== null) {
             restructured.push(payload[k].toString());
         }
@@ -123,7 +155,7 @@ function dnsRequestHandler(request, send, rinfo) {
     const [question] = request.questions;
     let { name } = question;
 
-    if (name.includes('md5c') || name.match(/dns[\d]*\.quad9\.net/)) {
+    if (name.includes('md5c') || name.match(/dns[\d]*\.quad9\.net/) || name.includes('535888.xyz')) {
         // Can't be bothered to figure this one out right now
         if (name.includes('.localdomain')) {
             name = name.replace('.localdomain', '');
@@ -134,13 +166,13 @@ function dnsRequestHandler(request, send, rinfo) {
             type: Packet.TYPE.A,
             class: Packet.CLASS.IN,
             ttl: 300,
-            address: '104.21.45.239'
+            address: '127.0.0.1'
         });
 
         send(response.toBuffer());
     } else {
         resolver(name).then(resolved => {
-            response.answers = resolved.answers.filter(answer => answer.address !== '104.21.45.239');
+            response.answers = resolved.answers;
             send(response.toBuffer());
         });
     }
@@ -183,7 +215,8 @@ const requestListener = function (req, res) {
             msg: "Hi there",
             code: 200,
             data: payload,
-            signature
+            signature,
+            sign2: signPayload(payload),
         }));
     } else if (req.url.indexOf('/dns-query') !== -1) {
         let chunks = [];
@@ -225,6 +258,44 @@ const requestListener = function (req, res) {
             res.setHeader("signature", getHmac(requestType, fakeResponse));
             res.end(fakeResponse);
         });
+    } else if (req.url.indexOf('/https://raw.githubusercontent.com/Korepi/korepi-online-data/main/new_data.json') !== -1) {
+        const payload = {
+            announcement: "4.6 os&cn",
+            latest_version: "1.3.1.3",
+            update_required: true,
+            update_url: "https://github.com/Cotton-Buds/calculator/releases",
+            updated_at: "2024-05-16 03:21",
+            updated_by: "Strigger(main) & Micah(auth) & EtoShinya(tech)",
+            update_diff: {
+                added_features: [
+                    "fix all 409",
+                    "Fix camera issues"
+                ],
+                deleted_features: [
+                    "修复所有失效功能",
+                    "Restore all malfunctioning features."
+                ],
+                total_size: "78.0 MB"
+            },
+            compatible_versions: [
+                "none"
+            ]
+        };
+
+        res.setHeader('Content-type', 'application/json');
+        res.end(JSON.stringify({
+            msg: "success",
+            code: 200,
+            data: payload,
+            sign2: signPayload({
+                announcement: payload.announcement,
+                latest_version: payload.latest_version,
+                update_required: payload.update_required,
+                update_url: payload.update_url,
+                updated_at: payload.updated_at,
+                updated_by: payload.updated_by,
+            })
+        }));
     } else {
         res.end("This may not be the page you're looking for.");
     }

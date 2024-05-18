@@ -4,3 +4,4 @@ ext_enc.json
 debug_online.js
 node_modules/
 certs_backup/
+build/

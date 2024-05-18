@@ -17,25 +17,12 @@ You'll want to have at least Node 18 or newer. Don't forget to install the depen
 ```
 127.0.0.1
 ```
-7. Add `104.21.45.239` as an additional IP address on your network card. A guide on how to do that can be found [here](https://www.itsyourip.com/networking/how-to-add-multiple-ip-address-in-windows-2000xp2003/). An example video can be found here [here](https://imgur.com/a/TzrSnGM).
+7. Use any DLL injector that you prefer and have it auto inject `lol.dll` (available from the [releases](https://github.com/fadillzzz/korepi-tools/releases) page or compile yourself) into Korepi's launcher.
 8. Launch Korepi.
-
-## How to Use (Online auth)
-
-1. In the directory where Korepi executable is located, create a file named `license.json` and copy the following line into it:
-
-```
-{"license":"KOREPI-REAL-KEY"}
-```
-2. Run `ssl_gen.js` and install the generated certificated (`certs/md5c.korepi.com.crt`) as a trusted root certificate.
-3. Edit your hosts file and add the following lines:
-```
-127.0.0.1 auth.Btxo.cn
-```
-4. Then start `server.js` and launch Korepi.
+9. If everything goes well, you'll eventually be prompted to enter the file path to your `md5c.korepi.com.pub` file. Simply input the file path and the game should start (unless Korepi crashes due to instability).
 
 ## Notes
-- For future launches, you only need to run the `server.js` file (no need to regenerate the license or SSL).
+- For future launches, you *may* not need to regenerate the license or the SSL certificate.
 - If you're already running a DNS resolver on port 53, then I assume you know what you're doing.
 - I'm not responsible for any damages you may incur from using this. This is publicly available for educational purposes only.
 
