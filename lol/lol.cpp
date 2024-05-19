@@ -79,14 +79,11 @@ int start() {
         }
 
         {
-            const void *found = nullptr;
+            const void *found =
+                Sig::find(buf, expectedRegion, "48 89 5C 24 08 48 89 74 24 10 57 48 83 EC 20 48 8B DA E8");
 
-            while (found == nullptr) {
-                found = Sig::find(buf, expectedRegion, "48 89 5C 24 08 48 89 74 24 10 57 48 83 EC 20 48 8B DA E8");
-
-                if (!ReadProcessMemory(proc, base, (void *)buf, expectedRegion, NULL)) {
-                    throw new std::runtime_error("Could not read process memory");
-                }
+            if (found == nullptr) {
+                throw new std::runtime_error("Pattern not found");
             }
 
             const auto relative = (char *)found - buf;
