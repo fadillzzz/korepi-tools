@@ -51,7 +51,7 @@ int start() {
         char *base = NULL;
         MEMORY_BASIC_INFORMATION mbi;
         bool foundBase = false;
-        const auto expectedSize = 0x39b6000;
+        const auto expectedSize = 0x39e1000;
 
         std::cout << "Searching for base address..." << std::endl;
 
@@ -71,7 +71,7 @@ int start() {
         std::cout << "Base address: " << (void *)base << std::endl;
         std::cout << "Region size: " << std::hex << mbi.RegionSize << std::endl;
 
-        const auto expectedRegion = 0x3da000;
+        const auto expectedRegion = 0x3d3000;
 
         char *buf = new char[expectedRegion];
         if (!ReadProcessMemory(proc, base, (void *)buf, expectedRegion, NULL)) {
@@ -224,7 +224,7 @@ int start() {
                 0x41, 0x52,                                                 // push r10
                 0x41, 0x51,                                                 // push r9
                 0x49, 0xb9, 0xde, 0xc0, 0xad, 0xba, 0xde, 0xc0, 0xad, 0xba, // mov r9, 0xbaadc0debaadc0de
-                0x4D, 0x8D, 0x91, 0xD0, 0x91, 0x57, 0x00,                   // lea r10, [r9+0x5791d0]
+                0x4D, 0x8D, 0x91, 0xC0, 0x22, 0x57, 0x00,                   // lea r10, [r9+0x5722C0]
                 0x4C, 0x39, 0xD1,                                           // cmp rcx, r10
                 0x41, 0x59,                                                 // pop r9
                 0x41, 0x5A,                                                 // pop r10
