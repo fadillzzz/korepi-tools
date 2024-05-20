@@ -18,7 +18,7 @@ You'll want to have at least Node 18 or newer. Don't forget to install the depen
 127.0.0.1 ghp.535888.xyz
 127.0.0.1 md5c.535888.xyz
 ```
-7. Get `lol.dll` and `injector.exe` (available from the [releases](https://github.com/fadillzzz/korepi-tools/releases) page or compile yourself) and put them in the same folder as Korepi.
+7. Get `lol.dll` and `injector.exe` (available from the [releases](https://github.com/fadillzzz/korepi-tools/releases) page or compile yourself) and put them in the same folder as Korepi (your Korepi must be named `korepi.exe`).
 8. Launch Korepi.
 9. If everything goes well, you'll eventually be prompted to enter the file path to your `md5c.korepi.com.pub` file. Simply input the file path and the game should start (unless Korepi crashes due to instability).
 
