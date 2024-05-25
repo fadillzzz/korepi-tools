@@ -55,17 +55,17 @@ int start() {
 
         std::cout << "Searching for base address..." << std::endl;
 
-        while (foundBase == false) {
-            base = NULL;
-
-            while (VirtualQueryEx(proc, base, &mbi, sizeof(mbi)) == sizeof(MEMORY_BASIC_INFORMATION)) {
-                if (mbi.RegionSize == expectedSize) {
-                    foundBase = true;
-                    break;
-                }
-
-                base += mbi.RegionSize;
+        while (VirtualQueryEx(proc, base, &mbi, sizeof(mbi)) == sizeof(MEMORY_BASIC_INFORMATION)) {
+            if (mbi.RegionSize == expectedSize) {
+                foundBase = true;
+                break;
             }
+
+            base += mbi.RegionSize;
+        }
+
+        if (!foundBase) {
+            throw new std::runtime_error("Could not find base address. Potential version mismatch.");
         }
 
         std::cout << "Base address: " << (void *)base << std::endl;
