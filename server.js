@@ -186,7 +186,7 @@ const requestListener = function (req, res) {
         const path = req.url;
         const splits = path.split('/');
         const id = splits[splits.length - 1];
-        const matches = id.match(/([a-z0-9]+):(\d+)\??/i);
+        const matches = id.match(/([a-z0-9\-]+):(\d+)\??/i);
 
         const payload = {
             createBy: null,
@@ -211,13 +211,15 @@ const requestListener = function (req, res) {
         const signature = getHash(payload);
 
         res.setHeader('Content-type', 'application/json');
-        res.end(JSON.stringify({
+        res.setHeader('Transfer-Encoding', 'chunked');
+        res.write(JSON.stringify({
             msg: "Hi there",
             code: 200,
             data: payload,
             signature,
             sign2: signPayload(payload),
         }));
+        res.end();
     } else if (req.url.indexOf('/dns-query') !== -1) {
         let chunks = [];
 
