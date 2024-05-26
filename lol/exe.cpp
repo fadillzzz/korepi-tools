@@ -114,6 +114,7 @@ HANDLE WINAPI createThread(HANDLE hProcess, LPSECURITY_ATTRIBUTES lpThreadAttrib
     if ((int64_t)hProcess != -1) {
         const auto path = std::filesystem::current_path() / "dll.dll";
         inject(hProcess, path.string());
+        Sleep(2000);
     }
 
     return oCreateRemoteThreadEx(hProcess, lpThreadAttributes, dwStackSize, lpStartAddress, lpParameter,
