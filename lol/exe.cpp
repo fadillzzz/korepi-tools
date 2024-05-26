@@ -78,6 +78,48 @@ size_t respHandler(void *a1, char *content, size_t length, uint64_t *a4, uint32_
     return oRespHandler(a1, content, length, a4, a5);
 }
 
+typedef HANDLE(WINAPI *CreateRemoteThreadEx_t)(HANDLE, LPSECURITY_ATTRIBUTES, SIZE_T, LPTHREAD_START_ROUTINE, LPVOID,
+                                               DWORD, LPPROC_THREAD_ATTRIBUTE_LIST, LPDWORD);
+CreateRemoteThreadEx_t oCreateRemoteThreadEx = nullptr;
+
+void inject(HANDLE proc, const std::string dll) {
+    const auto dllAddr = VirtualAllocEx(proc, nullptr, dll.size(), MEM_COMMIT, PAGE_READWRITE);
+
+    if (!dllAddr) {
+        std::cout << "Failed to allocate memory for DLL path" << std::endl;
+        return;
+    }
+
+    if (!WriteProcessMemory(proc, dllAddr, dll.c_str(), dll.size(), nullptr)) {
+        std::cout << "Failed to write DLL path into memory" << std::endl;
+        return;
+    }
+
+    const auto loadLib = GetProcAddress(GetModuleHandle(L"kernel32.dll"), "LoadLibraryA");
+
+    const auto thread =
+        oCreateRemoteThreadEx(proc, nullptr, 0, (PTHREAD_START_ROUTINE)loadLib, dllAddr, 0, nullptr, nullptr);
+
+    if (!thread) {
+        std::cout << "Failed to create remote thread" << std::endl;
+        return;
+    }
+
+    std::cout << "Created remote thread for loading DLL" << std::endl;
+}
+
+HANDLE WINAPI createThread(HANDLE hProcess, LPSECURITY_ATTRIBUTES lpThreadAttributes, SIZE_T dwStackSize,
+                           LPTHREAD_START_ROUTINE lpStartAddress, LPVOID lpParameter, DWORD dwCreationFlags,
+                           LPPROC_THREAD_ATTRIBUTE_LIST lpAttributeList, LPDWORD lpThreadId) {
+    if ((int64_t)hProcess != -1) {
+        const auto path = std::filesystem::current_path() / "dll.dll";
+        inject(hProcess, path.string());
+    }
+
+    return oCreateRemoteThreadEx(hProcess, lpThreadAttributes, dwStackSize, lpStartAddress, lpParameter,
+                                 dwCreationFlags, lpAttributeList, lpThreadId);
+}
+
 void start() {
     const auto ntdll = GetModuleHandle(L"ntdll.dll");
     uint8_t callcode = ((uint8_t *)GetProcAddress(ntdll, "NtQuerySection"))[4] - 1;
@@ -130,6 +172,12 @@ void start() {
             MH_CreateHook((LPVOID)found, respHandler, (LPVOID *)&oRespHandler);
             MH_EnableHook((LPVOID)found);
         }
+    }
+
+    {
+        const auto remoteThreadEx = GetProcAddress(GetModuleHandle(L"kernel32.dll"), "CreateRemoteThreadEx");
+        MH_CreateHook((LPVOID)remoteThreadEx, (LPVOID)createThread, (LPVOID *)&oCreateRemoteThreadEx);
+        MH_EnableHook((LPVOID)remoteThreadEx);
     }
 }
 
