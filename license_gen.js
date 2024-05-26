@@ -15,7 +15,7 @@ wREoekljDot8noMOQiBo0NgqmkLLK2WQ2TaTSm3A/E6d7FI+HrdPdl/GmMdTF1tf
 lr1yMFQ1eAdOJqnmM5YxCv4FsU2qpZFFXNEbnjJ+mx549LMUWBUeRjOwZ8zXUWxd
 oQIDAQAB
 -----END PUBLIC KEY-----`;
-    const privateKey = `'-----BEGIN RSA PRIVATE KEY-----
+    const privateKey = `-----BEGIN RSA PRIVATE KEY-----
 MIIEowIBAAKCAQEA0SxoW83nU4qAbHXqjhalMiU62ae79Ayv/EAmVfJEeCymJIpv
 tTqoPr99MBMDMHPxqqW1TgapD0bdAoU0vBpxG5INKIQnVi1ZE0YPP1GKUXN4nchM
 31a9NqG4mdWXtpD/jTt40Tpxn/zaj/5kDCuPo+iKQqwzKnE27Fyi0USLK82PfwCN
@@ -41,7 +41,7 @@ FsvTYEbrEE/RgYFsG5mV+RvRbZBjamJA1vaH3ctiwJv+pCX3zavIeT4AkqetGcIO
 EogZAoGBAMNI6WOB/u4vm5QpJVW+p33xyJJTmVTmzCFXCRsOvC0gDwBZcKGe4BIR
 E7CyLasw3HG9IhZYOi/KoX+UQrcAOcRPAsJmlqiQxu2qskX81AiOkhPEBprVRhj3
 VqquzXQuHpi/UwwiVoBX0Qi1/bWI1t5krlF4Me17cT6hffD0N/Qr
------END RSA PRIVATE KEY-----'`;
+-----END RSA PRIVATE KEY-----`;
 
 
     const randomBytes = crypto.randomBytes(10);
