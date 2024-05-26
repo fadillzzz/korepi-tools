@@ -2,6 +2,7 @@
 #include <Windows.h>
 
 #include <TlHelp32.h>
+#include <filesystem>
 #include <iostream>
 #include <shellapi.h>
 #include <string>
@@ -42,14 +43,7 @@ void inject(HANDLE proc, const std::string dll) {
         return;
     }
 
-    PTHREAD_START_ROUTINE loadLib = nullptr;
-
-    do {
-        const auto kernel32 = GetModuleBaseAddress(proc, L"kernel32.dll");
-        loadLib = (PTHREAD_START_ROUTINE)GetProcAddress((HMODULE)kernel32, "LoadLibraryA");
-        std::cout << "kernel32.dll hasn't been loaded. Waiting for 1 sec..." << std::endl;
-        Sleep(1000);
-    } while (loadLib == nullptr);
+    const auto loadLib = GetProcAddress(GetModuleHandle(L"kernel32.dll"), "LoadLibraryA");
 
     const auto thread =
         CreateRemoteThreadEx(proc, nullptr, 0, (PTHREAD_START_ROUTINE)loadLib, dllAddr, 0, nullptr, nullptr);
@@ -73,7 +67,7 @@ int main() {
     if (!ShellExecuteEx(&shExecInfo)) {
         std::cout << "Failed to start korepi.exe" << std::endl;
     } else {
-        const std::string dll = "lol.dll";
+        const std::string dll = (std::filesystem::current_path() / "exe.dll").string();
 
         inject(shExecInfo.hProcess, dll);
 
