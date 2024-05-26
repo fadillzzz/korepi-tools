@@ -2,10 +2,6 @@
 
 Some Korepi related stuff that I wrote while learning how to hack
 
-## Prerequisites
-
-You'll want to have at least Node 18 or newer. Don't forget to install the dependencies with `npm i`.
-
 ## How to Use
 
 1. Extract the zip file from the [releases](https://github.com/fadillzzz/korepi-tools/releases) page into the same folder as Korepi.
@@ -13,6 +9,10 @@ You'll want to have at least Node 18 or newer. Don't forget to install the depen
 3. Start `injector.exe` as admin.
 
 ## How to Use (Local auth)
+
+### Prerequisites
+
+You'll want to have at least Node 18 or newer. Don't forget to install the dependencies with `npm i`.
 
 1. Launch Korepi once without any license, and it should give you a hardware ID.
 2. Then run the `license_gen.js` which will asks you for your HWID and generates a license file to use.
