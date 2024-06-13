@@ -11,7 +11,6 @@
 
 typedef uintptr_t (*hwid_t)(uintptr_t, size_t, size_t, uintptr_t);
 hwid_t oHwid = nullptr;
-
 uintptr_t hwid(uintptr_t a1, size_t a2, size_t a3, uintptr_t a4) {
     if (a1 == 0x14ecf0) {
         const auto s = std::string("---------Hi-Korepi-Devs---------");
@@ -38,7 +37,6 @@ void options(void *a1, size_t a2, void *a3) {
 
 typedef size_t (*respHandler_t)(void *, char *, size_t, uint64_t *, uint32_t *a5);
 respHandler_t oRespHandler = nullptr;
-
 const auto resp =
     R"({"msg": "vpJSftgQ2noDAZR3Iri/ForvdhDZvxwlJCXowV9TgKSs+BoMyBMOIuxjpDcMTSov1thaXhg/d9aAKcpxOP6glQ3bSd8bHIGMku3Ck/33VdYhtzx4HwC4Lel5mVGZ9+2jffsIgHyIwxMl+8kYwh/QGQRlkC8zFfyNaMszsZiOxIJCy/RMYfI3buvCDPH/4D1/VxysPnaX+QtrVrs7Bt74byqnd38bi0GhpllEWL7CO+7fI+vMe2OSv6s0CUaOqzhDC5N8wIkHsthyVyP+GYoltTov3Bu5iaxmgZc/eYQPTkTWQ759pIVNjKJwnQI3EtOEdrRog6LAkA/CMGwMwBkScvY508Z3KhnNqqIIF9RpYLI6rdST+o2t5gIK4sElQg/2wHZT6wSm23t7YdxnwzEFZysv/H0y63iI4NMUmyZIkRvCyxlWVMpTt/rV9qubdbCjGDxG7A/0LbxCJBfBgEWu4Krpp1S+hk4qgIB+2apCh5sxU76mLzQdFLzNrgmbQADapyDO6rWw777F9FKlo/r9II8kISi/+2FxXp7TZE3ALbcyUo7zKucahsq7u9ucENm64D3PKV4YZCHchQY7xyYI4DaC1PQzleJxGaGbCoBQ0PZK7f33d3N3qB10OaEfe2de4uTcOKbVAjtjSLrlZcMGiZd40Bho76xCtcgAKG2FDxbH/PJo4BoIYwqiDzqpmxXBOsn0JqKLGLaAyU840GAgyLO62lE7/A26w+B9q7hkOIcKlfXZpdwjsll/dADe2U/uF5nrLxEOUGDx9gbUoB95KLD1S3KCCyaLuv8j4imt2E9EgDzk/1XdIwnbPGAECajV5z4yTpMuyD9XBhmJQIFutw==", "code": 200})";
 const auto chunkLength = std::format("{:x}", strlen(resp));
@@ -46,11 +44,14 @@ const auto firstChunk = std::format("{}\r\n{}\r\n", chunkLength, resp);
 const auto secondChunk = std::format("0\r\n\r\n");
 const auto aggregated = firstChunk + secondChunk;
 
+bool doneMagic = false;
+
 size_t respHandler(void *a1, char *content, size_t length, uint64_t *a4, uint32_t *a5) {
     if (fakeResp == true) {
         fakeResp = false;
         memcpy(content, aggregated.c_str(), aggregated.size() + 1);
         length = aggregated.size();
+        doneMagic = true;
     }
 
     return oRespHandler(a1, content, length, a4, a5);
@@ -89,11 +90,11 @@ void inject(HANDLE proc, const std::string dll) {
 HANDLE WINAPI createThread(HANDLE hProcess, LPSECURITY_ATTRIBUTES lpThreadAttributes, SIZE_T dwStackSize,
                            LPTHREAD_START_ROUTINE lpStartAddress, LPVOID lpParameter, DWORD dwCreationFlags,
                            LPPROC_THREAD_ATTRIBUTE_LIST lpAttributeList, LPDWORD lpThreadId) {
-    // if ((int64_t)hProcess != -1) {
-    //     const auto path = std::filesystem::current_path() / "dll.dll";
-    //     inject(hProcess, path.string());
-    //     Sleep(2000);
-    // }
+    if ((int64_t)hProcess != -1) {
+        const auto path = std::filesystem::current_path() / "dll.dll";
+        inject(hProcess, path.string());
+        Sleep(2000);
+    }
 
     return oCreateRemoteThreadEx(hProcess, lpThreadAttributes, dwStackSize, lpStartAddress, lpParameter,
                                  dwCreationFlags, lpAttributeList, lpThreadId);
@@ -153,11 +154,18 @@ void start() {
         }
     }
 
-    // {
-    //     const auto remoteThreadEx = GetProcAddress(GetModuleHandle(L"kernel32.dll"), "CreateRemoteThreadEx");
-    //     MH_CreateHook((LPVOID)remoteThreadEx, (LPVOID)createThread, (LPVOID *)&oCreateRemoteThreadEx);
-    //     MH_EnableHook((LPVOID)remoteThreadEx);
-    // }
+    while (doneMagic == false) {
+        Sleep(1);
+    }
+
+    MH_DisableHook(MH_ALL_HOOKS);
+    MH_RemoveHook(MH_ALL_HOOKS);
+
+    {
+        const auto remoteThreadEx = GetProcAddress(GetModuleHandle(L"kernel32.dll"), "CreateRemoteThreadEx");
+        MH_CreateHook((LPVOID)remoteThreadEx, (LPVOID)createThread, (LPVOID *)&oCreateRemoteThreadEx);
+        MH_EnableHook((LPVOID)remoteThreadEx);
+    }
 }
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
