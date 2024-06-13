@@ -9,15 +9,15 @@
 #include "MinHook.h"
 #include "Sig.hpp"
 
-typedef char **(*hwid_t)(char **);
+typedef uintptr_t (*hwid_t)(uintptr_t, size_t, size_t, uintptr_t);
 hwid_t oHwid = nullptr;
+uintptr_t hwid(uintptr_t a1, size_t a2, size_t a3, uintptr_t a4) {
+    if (a1 == 0x14ecf0) {
+        const auto s = std::string("---------Hi-Korepi-Devs---------");
+        memcpy((void *)a4, s.c_str(), s.size() + 1);
+    }
 
-char **hwid(char **ret) {
-    oHwid(ret);
-    const auto s = std::string("---------Hi-Korepi-Devs---------");
-    memcpy(*ret, s.c_str(), s.size() + 1);
-
-    return ret;
+    return oHwid(a1, a2, a3, a4);
 }
 
 bool fakeResp = false;
@@ -37,42 +37,21 @@ void options(void *a1, size_t a2, void *a3) {
 
 typedef size_t (*respHandler_t)(void *, char *, size_t, uint64_t *, uint32_t *a5);
 respHandler_t oRespHandler = nullptr;
-
-const auto resp = R"({
-    "msg": "Hi there",
-    "code": 200,
-    "data": {
-        "createBy": null,
-        "createTime": "2024-05-25T14:06:09.662Z",
-        "updateBy": "anonymousUser",
-        "updateTime": "2024-05-25T14:06:09.662Z",
-        "delFlag": 0,
-        "remark": "Oops!",
-        "id": 44262,
-        "roleValue": 25,
-        "cardKey": null,
-        "expiryTime": "2038-01-19T03:14:07.000Z",
-        "lastLoginTime": "2024-05-25T14:06:09.662Z",
-        "hwid": "---------Hi-Korepi-Devs---------",
-        "fileMd5": "mokPVuACUwR5Qw==",
-        "resetTime": null,
-        "resetNum": 4,
-        "pauseTime": null,
-        "status": 0
-    },
-    "signature": "a5879201e7fb4e3064390fccb0d8bbcf628c70bb237843101f314710ebfa0adc",
-    "sign2": "coUVZrl9x43Dql30LoOOpp/U7+gVb7298CeYu6uu8gT1RRxsf4jvyz/xQckiDWd5Sj43dl5AAzdmJGPPFtyQC3haU20H6v09C6whJqSwHDuizT+SW7VFZbWT3jhc+y1bgkYEhbyxHK9hkTGF8hlMk6HSkhAg1vl8t/E7ZcScmh22ZRYXMRijZEEPCgNbDTXDwySqdRnEaLc17z4uvGG/+B2C/60T4aH4VFnFjDyCuIlxCOgMOUM3QcXj0KZakmHxddURpAULfBi00LCamJlJIeUFbnlg3vcrNoCxD/jpHmdZn0jr30jXpgljhAb5AxsX1xwdF5wYROiJTWv6U6nm0A=="
-})";
+const auto resp =
+    R"({"msg": "vpJSftgQ2noDAZR3Iri/ForvdhDZvxwlJCXowV9TgKSs+BoMyBMOIuxjpDcMTSov1thaXhg/d9aAKcpxOP6glQ3bSd8bHIGMku3Ck/33VdYhtzx4HwC4Lel5mVGZ9+2jffsIgHyIwxMl+8kYwh/QGQRlkC8zFfyNaMszsZiOxIJCy/RMYfI3buvCDPH/4D1/VxysPnaX+QtrVrs7Bt74byqnd38bi0GhpllEWL7CO+7fI+vMe2OSv6s0CUaOqzhDC5N8wIkHsthyVyP+GYoltTov3Bu5iaxmgZc/eYQPTkTWQ759pIVNjKJwnQI3EtOEdrRog6LAkA/CMGwMwBkScvY508Z3KhnNqqIIF9RpYLI6rdST+o2t5gIK4sElQg/2wHZT6wSm23t7YdxnwzEFZysv/H0y63iI4NMUmyZIkRvCyxlWVMpTt/rV9qubdbCjGDxG7A/0LbxCJBfBgEWu4Krpp1S+hk4qgIB+2apCh5sxU76mLzQdFLzNrgmbQADapyDO6rWw777F9FKlo/r9II8kISi/+2FxXp7TZE3ALbcyUo7zKucahsq7u9ucENm64D3PKV4YZCHchQY7xyYI4DaC1PQzleJxGaGbCoBQ0PZK7f33d3N3qB10OaEfe2de4uTcOKbVAjtjSLrlZcMGiZd40Bho76xCtcgAKG2FDxbH/PJo4BoIYwqiDzqpmxXBOsn0JqKLGLaAyU840GAgyLO62lE7/A26w+B9q7hkOIcKlfXZpdwjsll/dADe2U/uF5nrLxEOUGDx9gbUoB95KLD1S3KCCyaLuv8j4imt2E9EgDzk/1XdIwnbPGAECajV5z4yTpMuyD9XBhmJQIFutw==", "code": 200})";
 const auto chunkLength = std::format("{:x}", strlen(resp));
 const auto firstChunk = std::format("{}\r\n{}\r\n", chunkLength, resp);
 const auto secondChunk = std::format("0\r\n\r\n");
 const auto aggregated = firstChunk + secondChunk;
+
+bool doneMagic = false;
 
 size_t respHandler(void *a1, char *content, size_t length, uint64_t *a4, uint32_t *a5) {
     if (fakeResp == true) {
         fakeResp = false;
         memcpy(content, aggregated.c_str(), aggregated.size() + 1);
         length = aggregated.size();
+        doneMagic = true;
     }
 
     return oRespHandler(a1, content, length, a4, a5);
@@ -149,7 +128,7 @@ void start() {
     {
         const void *found = Sig::find(
             exe, size,
-            "48 89 5C 24 10 48 89 74 24 18 48 89 7C 24 20 55 41 54 41 55 41 56 41 57 48 8D 6C 24 C9 48 81 EC C0");
+            "40 53 56 41 56 41 57 48 83 EC 28 48 BB FF FF FF FF FF FF FF 7F 4D 8B F9 4C 8B F2 48 8B F1 48 3B D3");
 
         if (found != nullptr) {
             MH_CreateHook((LPVOID)found, hwid, (LPVOID *)&oHwid);
@@ -174,6 +153,13 @@ void start() {
             MH_EnableHook((LPVOID)found);
         }
     }
+
+    while (doneMagic == false) {
+        Sleep(1);
+    }
+
+    MH_DisableHook(MH_ALL_HOOKS);
+    MH_RemoveHook(MH_ALL_HOOKS);
 
     {
         const auto remoteThreadEx = GetProcAddress(GetModuleHandle(L"kernel32.dll"), "CreateRemoteThreadEx");
