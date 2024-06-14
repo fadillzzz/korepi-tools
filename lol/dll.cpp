@@ -61,6 +61,8 @@ void start() {
         }
     }
 
+    Sleep(4000);
+
     MEMORY_BASIC_INFORMATION mbi;
     bool foundBase = false;
     const auto expectedRegion = 0x3c7000;
