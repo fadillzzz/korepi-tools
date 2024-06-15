@@ -9,15 +9,13 @@
 #include "MinHook.h"
 #include "Sig.hpp"
 
-typedef uintptr_t (*hwid_t)(uintptr_t, size_t, size_t, uintptr_t);
+typedef char** (*hwid_t)(char **);
 hwid_t oHwid = nullptr;
-uintptr_t hwid(uintptr_t a1, size_t a2, size_t a3, uintptr_t a4) {
-    if (a1 == 0x14ecf0) {
-        const auto s = std::string("---------Hi-Korepi-Devs---------");
-        memcpy((void *)a4, s.c_str(), s.size() + 1);
-    }
-
-    return oHwid(a1, a2, a3, a4);
+char **hwid(char **hwid_out) {
+    auto result = oHwid(hwid_out);
+    const auto s = std::string("---------Hi-Korepi-Devs---------");
+    memcpy(*hwid_out, s.c_str(), s.size() + 1);
+    return result;
 }
 
 bool fakeResp = false;
@@ -126,9 +124,7 @@ void start() {
     const auto size = nt->OptionalHeader.SizeOfImage;
 
     {
-        const void *found = Sig::find(
-            exe, size,
-            "40 53 56 41 56 41 57 48 83 EC 28 48 BB FF FF FF FF FF FF FF 7F 4D 8B F9 4C 8B F2 48 8B F1 48 3B D3");
+        const void *found = Sig::find(exe, size, "48 89 5C 24 10 48 89 7C 24 18 55 48 8D 6C");
 
         if (found != nullptr) {
             MH_CreateHook((LPVOID)found, hwid, (LPVOID *)&oHwid);
