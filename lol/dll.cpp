@@ -7,6 +7,9 @@
 #include <iostream>
 
 bool fakeResp = false;
+void *userData;
+typedef size_t (*callback_t)(char *ptr, size_t size, size_t nmemb, void *userdata);
+callback_t callback = nullptr;
 
 typedef void (*options_t)(void *, size_t, void *);
 options_t oOptions = nullptr;
@@ -18,27 +21,31 @@ void options(void *a1, size_t a2, void *a3) {
         }
     }
 
+    if (a2 == 10001) {
+        userData = a3;
+    }
+
+    if (a2 == 20011) {
+        callback = (callback_t)a3;
+    }
+
     oOptions(a1, a2, a3);
 }
 
-typedef size_t (*respHandler_t)(void *, char *, size_t, uint64_t *, uint32_t *a5);
-respHandler_t oRespHandler = nullptr;
-
-const auto resp =
+const std::string resp =
     R"({"msg": "vpJSftgQ2noDAZR3Iri/ForvdhDZvxwlJCXowV9TgKSs+BoMyBMOIuxjpDcMTSov1thaXhg/d9aAKcpxOP6glQ3bSd8bHIGMku3Ck/33VdYhtzx4HwC4Lel5mVGZ9+2jffsIgHyIwxMl+8kYwh/QGQRlkC8zFfyNaMszsZiOxIJCy/RMYfI3buvCDPH/4D1/VxysPnaX+QtrVrs7Bt74byqnd38bi0GhpllEWL7CO+7fI+vMe2OSv6s0CUaOqzhDC5N8wIkHsthyVyP+GYoltTov3Bu5iaxmgZc/eYQPTkTWQ759pIVNjKJwnQI3EtOEdrRog6LAkA/CMGwMwBkScvY508Z3KhnNqqIIF9RpYLI6rdST+o2t5gIK4sElQg/2wHZT6wSm23t7YdxnwzEFZysv/H0y63iI4NMUmyZIkRvCyxlWVMpTt/rV9qubdbCjGDxG7A/0LbxCJBfBgEWu4Krpp1S+hk4qgIB+2apCh5sxU76mLzQdFLzNrgmbQADapyDO6rWw777F9FKlo/r9II8kISi/+2FxXp7TZE3ALbcyUo7zKucahsq7u9ucENm64D3PKV4YZCHchQY7xyYI4DaC1PQzleJxGaGbCoBQ0PZK7f33d3N3qB10OaEfe2de4uTcOKbVAjtjSLrlZcMGiZd40Bho76xCtcgAKG2FDxbH/PJo4BoIYwqiDzqpmxXBOsn0JqKLGLaAyU840GAgyLO62lE7/A26w+B9q7hkOIcKlfXZpdwjsll/dADe2U/uF5nrLxEOUGDx9gbUoB95KLD1S3KCCyaLuv8j4imt2E9EgDzk/1XdIwnbPGAECajV5z4yTpMuyD9XBhmJQIFutw==", "code": 200})";
-const auto chunkLength = std::format("{:x}", strlen(resp));
-const auto firstChunk = std::format("{}\r\n{}\r\n", chunkLength, resp);
-const auto secondChunk = std::format("0\r\n\r\n");
-const auto aggregated = firstChunk + secondChunk;
 
-size_t respHandler(void *a1, char *content, size_t length, uint64_t *a4, uint32_t *a5) {
+typedef size_t (*perform_t)(void *);
+perform_t oPerform = nullptr;
+size_t perform(void *a1) {
     if (fakeResp == true) {
         fakeResp = false;
-        memcpy(content, aggregated.c_str(), aggregated.size() + 1);
-        length = aggregated.size();
+        std::cout << "Faking result" << std::endl;
+        callback((char *)resp.c_str(), resp.size(), 1, userData);
+        return 0;
     }
 
-    return oRespHandler(a1, content, length, a4, a5);
+    return oPerform(a1);
 }
 
 void start() {
@@ -91,10 +98,10 @@ void start() {
     }
 
     {
-        const void *found = Sig::find(base, expectedRegion, "48 89 5C 24 20 56 57 41 54 41 55 41 56 48 83 EC 20");
+        const void *found = Sig::find(base, expectedRegion, "40 55 56 48 83 EC 38 48 8B F1 48 85 C9 75 0A 8D");
 
         if (found != nullptr) {
-            MH_CreateHook((LPVOID)found, (LPVOID)respHandler, (LPVOID *)&oRespHandler);
+            MH_CreateHook((LPVOID)found, perform, (LPVOID *)&oPerform);
             MH_EnableHook((LPVOID)found);
         }
     }
