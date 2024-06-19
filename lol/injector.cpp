@@ -74,8 +74,8 @@ int main() {
         CloseHandle(shExecInfo.hProcess);
     }
 
-    std::cout << "Press any key to exit" << std::endl;
-    getchar();
+    std::cout << "Exiting in 5 seconds..." << std::endl;
+    Sleep(5000);
 
     return 0;
 }

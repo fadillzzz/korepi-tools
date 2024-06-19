@@ -11,8 +11,4 @@ add_library(dll SHARED dll.cpp)
 target_link_libraries(dll minhook)
 target_include_directories(dll PRIVATE minhook/src)
 
-add_library(lol SHARED lol.cpp)
-target_link_libraries(lol minhook)
-target_include_directories(lol PRIVATE minhook/src)
-
 add_subdirectory(minhook)
