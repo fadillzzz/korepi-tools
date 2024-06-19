@@ -100,6 +100,22 @@ size_t perform(void *a1) {
     return oPerform(a1);
 }
 
+int connectWrite() { return 1; }
+
+const std::string readResponse =
+    R"(HTTP/1.1 200 OK
+Content-Length: 64
+Connection: close
+
+{"api":"time","code":"1","currentTime": 1718762445577,"msg":""})";
+size_t readIdx = 0;
+int read(void *a1, void *buf, int numBytes) {
+    const auto ret = readResponse.substr(readIdx, numBytes);
+    memcpy(buf, ret.c_str(), ret.size());
+    readIdx += ret.size();
+    return ret.size();
+}
+
 typedef HANDLE(WINAPI *CreateRemoteThreadEx_t)(HANDLE, LPSECURITY_ATTRIBUTES, SIZE_T, LPTHREAD_START_ROUTINE, LPVOID,
                                                DWORD, LPPROC_THREAD_ATTRIBUTE_LIST, LPDWORD);
 CreateRemoteThreadEx_t oCreateRemoteThreadEx = nullptr;
@@ -172,6 +188,35 @@ void cont() {
 
         if (found != nullptr) {
             MH_CreateHook((LPVOID)found, perform, (LPVOID *)&oPerform);
+            MH_EnableHook((LPVOID)found);
+        }
+    }
+
+    {
+        const void *found = Sig::find(exe, size, "40 53 B8 20 00 00 00 E8 64 6F 13 00 48 2B E0 48 83 79 30 00");
+
+        if (found != nullptr) {
+            MH_CreateHook((LPVOID)found, (LPVOID)connectWrite, nullptr);
+            MH_EnableHook((LPVOID)found);
+        }
+    }
+
+    {
+        const void *found =
+            Sig::find(exe, size, "B8 38 00 00 00 E8 96 55 13 00 48 2B E0 45 85 C0 79 2A BA D0 00 00 00");
+
+        if (found != nullptr) {
+            MH_CreateHook((LPVOID)found, (LPVOID)connectWrite, nullptr);
+            MH_EnableHook((LPVOID)found);
+        }
+    }
+
+    {
+        const void *found =
+            Sig::find(exe, size, "B8 38 00 00 00 E8 66 5B 13 00 48 2B E0 45 85 C0 79 2A BA DF 00 00 00");
+
+        if (found != nullptr) {
+            MH_CreateHook((LPVOID)found, (LPVOID)read, nullptr);
             MH_EnableHook((LPVOID)found);
         }
     }
